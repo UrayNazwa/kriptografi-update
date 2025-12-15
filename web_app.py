@@ -15,6 +15,9 @@ PRIVATE_KEY_PATH = os.path.join(KEYS_DIR, "private_key.pem")
 PUBLIC_KEY_PATH = os.path.join(KEYS_DIR, "public_key.pem")
 
 app = Flask(__name__)
+@app.route("/")
+def home():
+    return "Aplikasi Kriptografi Online"
 
 HISTORY_MAX = 50
 HISTORY = []
