@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <title>DSA Digital Signature - Web</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div style="display:flex; align-items:center; gap:12px;">
+            <h1 style="margin:0;">Digital Signature Algorithm </h1>
+        </div>
+        <div class="subtitle">Label output disesuaikan: "Enkripsi" = Sign, "Dekripsi" = Verify, "Ciphertext" = Signature.</div>
+
+        <!-- Kunci DSA (paling atas) -->
+        <div class="card">
+            <h2>Kunci DSA</h2>
+            {% if keys_exists %}
+                <div>Private: keys/private_key.pem &nbsp; | &nbsp; Public: keys/public_key.pem</div>
+            {% else %}
+                <div class="note">Kunci belum tersedia. Silakan buat terlebih dahulu.</div>
+            {% endif %}
+            <form method="post" action="/gen-keys" class="row">
+                <label>Ukuran Kunci</label>
+                <select name="key_size">
+                    <option value="1024">1024 (lebih rendah)</option>
+                    <option value="2048" selected>2048 (disarankan)</option>
+                    <option value="3072">3072 (lebih kuat)</option>
+                </select>
+                <button type="submit">Generate Keys</button>
+            </form>
+        </div>
+
+            <!-- Baris atas: Sign Pesan (Enkripsi), Verify Pesan (Dekripsi) -->
+            <div class="grid grid-top-messages" style="margin-top: 16px;">
+                <!-- Form: Sign Pesan (Enkripsi) -->
+                <div class="card">
+                    <h2>Sign Pesan (Enkripsi)</h2>
+                    <form method="post" action="/sign-message">
+                        <label>Pesan</label>
+                        <textarea name="message" rows="3" placeholder="Tulis pesan..."></textarea>
+
+                        <div class="row">
+                            <label>Batas angka signature</label>
+                            <input type="text" name="limit" value="50" class="short">
+                        </div>
+                        <div class="row">
+                            <label>
+                                <input type="checkbox" name="show_ascii"
+                                    {% if result and result.section == 'sign-message' and result.show_ascii %}checked{% endif %}>
+                                Tampilkan angka ASCII
+                            </label>
+                        </div>
+
+                        <div class="row">
+                            <button type="submit">Sign (Enkripsi)</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h2>Verify Pesan (Dekripsi)</h2>
+                    <form method="post" action="/verify-message">
+                        <label>Pesan</label>
+                        <textarea name="message" rows="3" placeholder="Tulis pesan yang akan diverifikasi..."></textarea>
+                        <label>Signature (Ciphertext, Base64)</label>
+                        <textarea name="signature_b64" rows="3" placeholder="Tempel signature Base64 di sini..."></textarea>
+                        <div class="row">
+                            <button type="submit">Verify (Dekripsi)</button>
+                        </div>
+                    </form>
+                </div>
+            </div> <!-- penutup grid-top-messages -->
+
+            <!-- Baris: Sign File, Verify File -->
+            <div class="grid grid-files-center" style="margin-top: 16px;">
+                <div class="card card-file">
+                    <h2>Sign File (Enkripsi)</h2>
+                    <form method="post" action="/sign-file" enctype="multipart/form-data">
+                        <label>Unggah File</label>
+                        <input type="file" name="file">
+                        <label>
+                                <input type="checkbox" name="show_ascii"
+                                    {% if result and result.section == 'sign-file' and result.show_ascii %}checked{% endif %}>
+                                Tampilkan angka ASCII
+                            </label>
+                        <div class="row">
+                            <button type="submit">Sign (Enkripsi)</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="card card-file">
+                    <h2>Verify File (Dekripsi)</h2>
+                    <form method="post" action="/verify-file" enctype="multipart/form-data">
+                        <label>Unggah File</label>
+                        <input type="file" name="file">
+                        <label>Signature (Ciphertext, Base64)</label>
+                        <textarea name="signature_b64" rows="3" placeholder="Tempel signature Base64 di sini..."></textarea>
+                        <div class="row">
+                            <button type="submit">Verify (Dekripsi)</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Kolom: Hasting (Hashing) -->
+            <div class="card" style="margin-top: 16px;">
+                <h2>Hashing Satu Arah</h2>
+                <form method="post" action="/hash">
+                    <label>Pesan</label>
+                    <textarea name="message" rows="3" placeholder="Tulis pesan untuk di-hash..." required></textarea>
+
+                    <label>Pesan (ubah dari pesan sebelumnya)</label>
+                    <textarea name="message2" rows="3" placeholder="Contoh perubahan kecil: ubah satu huruf, tambahkan spasi"></textarea>
+
+                    <div class="row">
+                        <label>Algoritma</label>
+                        <select name="algo">
+                            <option value="sha256" selected>SHA-256 (disarankan)</option>
+                            <option value="sha384">SHA-384</option>
+                            <option value="sha512">SHA-512</option>
+                        </select>
+                        <button type="submit">Hash</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Paling bawah: Output -->
+            {% if result %}
+            <div class="card" style="margin-top: 16px;">
+                <h2>Output</h2>
+                {% if result.error %}
+                    <div class="output">{{ result.error }}</div>
+                {% elif result.section == "gen-keys" %}
+                    <div class="output">[GEN KEYS] Ukuran: {{ result.key_size }}\nKunci berhasil dibuat.</div>
+                {% elif result.section == "sign-message" %}
+                    <div class="output">
+[INPUT] Pesan: {{ result.message }}
+[ENKRIPSI] Waktu enkripsi (sign): {{ result.enc_ms }} ms
+[ENKRIPSI] Ukuran ciphertext (signature bytes): {{ result.ciphertext_size }} bytes
+[ENKRIPSI] Ciphertext (Base64 signature): {{ result.ciphertext_b64 }}
+[ANGKA SIGNATURE DECIMAL] (preview): {{ result.decimal_preview }}
+{% if result.show_ascii %}[ANGKA ASCII PESAN]: {{ result.ascii_codes | join(' ') }}{% endif %}
+                    </div>
+                {% elif result.section == "verify-message" %}
+                    <div class="output">
+[INPUT] Pesan: {{ result.message }}
+[DEKRIPSI] Waktu dekripsi (verify): {{ result.dec_ms }} ms
+[VERIFY MESSAGE] Signature valid: {% if result.verify_valid %}<span class="ok">True</span>{% else %}<span class="bad">False</span>{% endif %}
+{% if not result.verify_valid and result.reasons %}
+[ALASAN] {{ result.reasons | join(' | ') }}
+{% endif %}
+                    </div>
+                {% elif result.section == "sign-file" %}
+                    <div class="output">
+[FILE] {{ result.filename }}
+[ENKRIPSI] Waktu enkripsi (sign): {{ result.enc_ms }} ms
+[ENKRIPSI] Ukuran ciphertext (signature bytes): {{ result.ciphertext_size }} bytes
+[ENKRIPSI] Ciphertext (Base64 signature): {{ result.ciphertext_b64 }}
+{% if result.show_ascii %}[ANGKA ASCII FILE]: {{ result.ascii_codes | join(' ') }}{% endif %}
+                    </div>
+                {% elif result.section == "verify-file" %}
+                    <div class="output">
+[FILE] {{ result.filename }}
+[DEKRIPSI] Waktu dekripsi (verify): {{ result.dec_ms }} ms
+[VERIFY FILE] Signature valid: {% if result.verify_valid %}<span class="ok">True</span>{% else %}<span class="bad">False</span>{% endif %}
+                    </div>
+                {% elif result.section == "hash" %}
+                    <div class="output">
+[HASH] Algoritma: {{ result.algo_label }} (panjang output: {{ result.digest_bits }} bit)
+[INPUT] Pesan: {{ result.message }}
+[INPUT] Panjang pesan: {{ result.input_len }} bytes
+[WAKTU] Hash: {{ result.hash_ms }} ms
+[DIGEST HEX]: {{ result.digest_hex }}
+{% if result.has_second %}
+[INPUT] Pesan (perubahan): {{ result.message2 }}
+[INPUT] Panjang pesan: {{ result.input2_len }} bytes
+[WAKTU] Hash: {{ result.hash2_ms }} ms
+[DIGEST HEX]: {{ result.digest2_hex }}
+
+PERBANDINGAN
+Sama: {% if result.compare_equal %}<span class="ok">True</span>{% else %}<span class="bad">False</span>{% endif %}
+Jarak Hamming: {{ result.hamming_bits }} bit dari {{ result.digest_bits }} bit
+Persentase beda: {{ result.percent_diff }}%
+XOR (hex): {{ result.xor_hex }}
+            {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <div class="row" style="margin-top: 10px;">
+                <a class="btn" href="/?show_history=1">Lihat Riwayat</a>
+                {% if show_history %}
+                <form method="post" action="/clear-history">
+                    <button type="submit" class="btn danger">Hapus Riwayat</button>
+                </form>
+                {% endif %}
+            </div>
+
+            {% if show_history and history %}
+            <div class="card" style="margin-top: 10px;">
+                <h2>Riwayat</h2>
+                {% for h in history %}
+                    <div class="output">
+[WAKTU] {{ h.time }}
+[SEKSI] {{ h.section }}
+{% if h.data %}[DETAIL]{% for k, v in h.data.items() %}
+{{ k }}: {{ v }}
+{% endfor %}{% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+</body>
+</html>
+

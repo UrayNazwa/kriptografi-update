@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <title>Riwayat</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="container">
+    <div style="display:flex; align-items:center; justify-content:space-between;">
+      <h1 style="margin:0;">Riwayat Proses</h1>
+      <a href="/" style="text-decoration:none;">
+        <button type="button">Kembali</button>
+      </a>
+    </div>
+    <div class="card" style="margin-top:16px;">
+      {% if events %}
+        <div class="output">
+          {% for e in events %}
+ID: {{ e.id }} | Waktu: {{ e.ts | round(3) }} | Bagian: {{ e.section }}
+Payload: {{ e.payload }}
+----------------------------------------
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="note">Belum ada data.</div>
+      {% endif %}
+    </div>
+  </div>
+</body>
+</html>

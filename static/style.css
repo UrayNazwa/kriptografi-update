@@ -1,0 +1,197 @@
+:root {
+    --bg: #f0f3f6;
+    --text: #635a51;
+    --muted: #64748b;
+    --border: #635a51;
+    --accent: #635a51;
+    --accent-hover: #635a51;
+    --danger: #dc2626;
+    --card-bg: #ffffff;
+    --output-bg: #f0f3f6;
+    --output-text: #635a51;
+    --ok: #16a34a;
+    --bad: #dc2626;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    font-family: system-ui, -apple-system, Arial, sans-serif;
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+}
+
+/* Container melebar penuh */
+.container {
+    max-width: 100%;
+    margin: 20px auto;
+    padding: 0 16px;
+}
+/* sebelumnya: max-width: 1600px */
+h1 { margin: 0 0 4px 0; }
+.subtitle { color: #7e7368; margin-bottom: 16px; }
+
+.card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    box-shadow: 0 1px 2px #635a51;
+}
+
+.card h2 { margin: 0 0 8px 0; font-size: 18px; }
+
+label { display: block; font-weight: 600; margin-top: 8px; }
+
+input[type="text"], textarea, select {
+    width: 100%;
+    padding: 8px;
+    margin-top: 4px;
+    border: 1px solid #635a51;
+    border-radius: 6px;
+    background: #fff;
+}
+
+input[type="file"] { margin-top: 4px; }
+
+.row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+    align-items: center;
+}
+
+.short { max-width: 120px; }
+
+button, .btn {
+    background: var(--accent);
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 12px;
+    cursor: pointer;
+}
+button:hover, .btn:hover { background: var(--accent-hover); }
+.danger { background: var(--danger); }
+
+.muted { color: var(--muted); font-size: 13px; }
+
+.output {
+    background: var(--output-bg);
+    color: var(--output-text);    
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    white-space: pre-wrap;
+    font-family: ui-monospace,
+    SFMono-Regular, Menlo, monospace;
+    box-sizing: border-box;
+    box-shadow: 0 1px 2px var(--border);
+    margin-top: 12px;
+}
+
+.ok { color: var(--ok); font-weight: 700; }
+.bad { color: var(--bad); font-weight: 700; }
+
+.note {
+    background: #fef9c3;
+    border: 1px solid #fde68a;
+    padding: 8px;
+    border-radius: 6px;
+}
+
+/* Grid: melebar ke kanan, responsif, tidak memanjang ke bawah */
+.grid {
+    display: grid;
+    gap: 16px;
+}
+
+/* Grid aksi (kartu-kartu fitur) */
+.grid-actions {
+    grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+}
+
+/* Di layar sedang-besar, paksa minimal 2 kolom agar melebar */
+@media (min-width: 900px) {
+    .grid-actions {
+        grid-template-columns: repeat(2, minmax(380px, 1fr));
+    }
+}
+
+/* Di layar besar, 3 kolom agar lebih melebar */
+@media (min-width: 1400px) {
+    .grid-actions {
+        grid-template-columns: repeat(3, minmax(420px, 1fr));
+    }
+}
+
+/* Output di sebelah kanan dan sticky di desktop agar selalu terlihat */
+.output-card {
+    position: relative;
+}
+@media (min-width: 900px) {
+    .output-card {
+        position: sticky;
+        top: 16px;
+        align-self: start;
+        height: fit-content;
+    }
+}
+
+/* Grid atas untuk pesan: dua kotak melebar penuh kiri-kanan */
+.grid-top-messages {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: 1fr; /* mobile: satu kolom */
+}
+
+/* Layar >= 900px: dua kolom penuh, tinggi seragam */
+@media (min-width: 900px) {
+    .grid-top-messages {
+        grid-template-columns: 1fr 1fr; /* penuh kiri-kanan */
+        align-items: stretch;           /* samakan tinggi */
+    }
+}
+
+/* Grid baris kedua: pusatkan dua kartu file di layar lebar */
+.grid-files-center {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: 1fr; /* mobile: satu kolom */
+}
+
+/* Pada layar >= 900px, tampilkan 2 kolom dan pusatkan */
+@media (min-width: 900px) {
+    .grid-files-center {
+        grid-template-columns: 1fr 1fr; /* penuh kiri-kanan seperti grid-top-messages */
+        align-items: stretch;           /* samakan tinggi kedua kartu */
+        /* hapus fixed width 420px dan justify-content:center */
+    }
+}
+
+/* Samakan tinggi setiap kartu file */
+.card-file {
+    height: 100%;
+}
+
+/* Posisi hanya untuk tombol History */
+.history-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+
+    padding: 10px 18px;
+    background-color: #4A5568;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    z-index: 999;
+}
+
+.history-btn:hover {
+    background-color: #2D3748;
+}
